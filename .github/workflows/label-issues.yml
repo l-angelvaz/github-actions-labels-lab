@@ -4,6 +4,8 @@ on:
   issues:
     types:
       - opened
+      - reopened
+    # Se ejecuta cuando un issue es abierto (opened) o reabierto (reopened)
 
 jobs:
   label_issues:
@@ -11,6 +13,8 @@ jobs:
     permissions:
       issues: write
     steps:
+
+      # Agrega lógica condicional basada en el contenido del issue
       - name: Add bug label for bug reports
         if: contains(github.event.issue.title, 'bug') || contains(github.event.issue.body, 'bug')
         run: gh issue edit "$NUMBER" --add-label "bug,triage"
@@ -35,6 +39,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
 
+      # Agrega un paso para comentar en el issue
       #- name: Add welcome comment
       #  run: |
       #    gh issue comment "$NUMBER" --body "¡Gracias por reportar este issue! 
@@ -45,6 +50,7 @@ jobs:
       #    GH_REPO: ${{ github.repository }}
       #    NUMBER: ${{ github.event.issue.number }}
 
+      # Etiquetado por Autor
       - name: Label issues from external contributors
         if: github.event.issue.author_association == 'NONE'
         run: gh issue edit "$NUMBER" --add-label "external-contribution"
@@ -53,6 +59,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
 
+      # Plantillas de issues, crear lógica basada en su estructura
       - name: Label based on issue template
         run: |
           if [[ "$BODY" == *"## Bug Report"* ]]; then
@@ -67,3 +74,29 @@ jobs:
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
           BODY: ${{ github.event.issue.body }}
+
+      # Agrega manejo de errores al workflow
+      - name: Add labels with error handling
+        run: |
+          if ! gh issue edit "$NUMBER" --add-label "$LABELS"; then
+            echo "Failed to add labels to issue #$NUMBER"
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          LABELS: triage
+
+      # Logging Detallado
+      - name: Add labels with logging
+        run: |
+          echo "Processing issue #$NUMBER"
+          echo "Adding labels: $LABELS"
+          gh issue edit "$NUMBER" --add-label "$LABELS"
+          echo "Labels added successfully"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          LABELS: triage
