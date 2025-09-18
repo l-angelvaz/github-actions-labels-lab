@@ -35,15 +35,15 @@ jobs:
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
 
-      - name: Add welcome comment
-        run: |
-          gh issue comment "$NUMBER" --body "¡Gracias por reportar este issue! 
-          Ha sido etiquetado automáticamente para revisión inicial. 
-          Un miembro del equipo lo revisará pronto."
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
-          NUMBER: ${{ github.event.issue.number }}
+      #- name: Add welcome comment
+      #  run: |
+      #    gh issue comment "$NUMBER" --body "¡Gracias por reportar este issue! 
+      #    Ha sido etiquetado automáticamente para revisión inicial. 
+      #    Un miembro del equipo lo revisará pronto."
+      #  env:
+      #    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #    GH_REPO: ${{ github.repository }}
+      #    NUMBER: ${{ github.event.issue.number }}
 
       - name: Label issues from external contributors
         if: github.event.issue.author_association == 'NONE'
@@ -52,3 +52,18 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
+
+      - name: Label based on issue template
+        run: |
+          if [[ "$BODY" == *"## Bug Report"* ]]; then
+            gh issue edit "$NUMBER" --add-label "bug,triage"
+          elif [[ "$BODY" == *"## Feature Request"* ]]; then
+            gh issue edit "$NUMBER" --add-label "enhancement,triage"
+          else
+            gh issue edit "$NUMBER" --add-label "triage"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
+          BODY: ${{ github.event.issue.body }}
