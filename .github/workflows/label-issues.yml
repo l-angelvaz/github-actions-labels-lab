@@ -44,3 +44,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
+
+      - name: Label issues from external contributors
+        if: github.event.issue.author_association == 'NONE'
+        run: gh issue edit "$NUMBER" --add-label "external-contribution"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
