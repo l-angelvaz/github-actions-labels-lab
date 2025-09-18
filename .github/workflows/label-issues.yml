@@ -34,3 +34,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
+
+      - name: Add welcome comment
+        run: |
+          gh issue comment "$NUMBER" --body "¡Gracias por reportar este issue! 
+          Ha sido etiquetado automáticamente para revisión inicial. 
+          Un miembro del equipo lo revisará pronto."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.issue.number }}
